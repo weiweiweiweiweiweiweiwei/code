@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Synapse v4: The Interactive Codex (Optimized)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* --- 全局設計系統 --- */
+        :root {
+            --primary-color: #4285F4; /* Google Blue */
+            --success-color: #34A853; /* Google Green */
+            --error-color: #EA4335;   /* Google Red */
+            --bg-color: #121212;
+            --surface-color: #1E1E1E;
+            --text-color: #E8EAED;
+            --text-secondary-color: #9AA0A6;
+            --border-color: #5F6368;
+            --font-primary: 'Poppins', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- 主應用容器 --- */
+        #app-container {
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--surface-color);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .view {
+            width: 100%;
+            height: 100%;
+            padding: 20px; /* Reduced padding for mobile */
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            overflow-y: auto; /* Allow scrolling on small screens */
+        }
+
+        .view.hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            transform: scale(0.98);
+        }
+
+        /* --- 主選單視圖 --- */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #main-menu h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        #main-menu p {
+            color: var(--text-secondary-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        .unit-selection {
+            display: flex;
+            flex-direction: column; /* Stacked on mobile */
+            gap: 20px;
+        }
+        .unit-card {
+            padding: 20px 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .unit-card:hover {
+            background-color: rgba(255,255,255,0.05);
+            transform: translateY(-5px);
+        }
+        .unit-card h2 { margin: 10px 0 0 0; }
+
+        /* --- 學習視圖 (行動裝置優先) --- */
+        #learn-view {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column layout */
+            grid-template-rows: auto 1fr auto; /* Sidebar, main content, playground */
+            gap: 20px;
+            height: 100%;
+        }
+        
+        /* 左側: 課程列表 */
+        .codex-sidebar {
+            position: relative;
+            padding-bottom: 50px; /* Space for back button */
+        }
+        .codex-sidebar h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .lesson-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex; /* Horizontal on mobile */
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 8px;
+        }
+        .lesson-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-secondary-color);
+            font-weight: 300;
+            border: 1px solid var(--border-color);
+        }
+        .lesson-item.locked {
+            cursor: not-allowed;
+            color: #666;
+            background-color: transparent;
+            border-color: #444;
+        }
+        .lesson-item:not(.locked):hover { background-color: rgba(255,255,255,0.05); }
+        .lesson-item.active {
+            background-color: rgba(66, 133, 244, 0.2);
+            border-color: var(--primary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .lesson-item.completed::before {
+            content: '✓ ';
+            color: var(--success-color);
+        }
+        #back-to-menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        /* 中間: 講解與指令 */
+        .insight-panel {
+            background-color: var(--bg-color);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-y: auto;
+        }
+        .insight-panel h3 { margin-top: 0; font-size: 1.5rem; }
+        .insight-panel p { line-height: 1.7; color: var(--text-secondary-color); }
+        .insight-panel code {
+            background-color: var(--surface-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+        }
+        
+        /* 右側: 遊樂場 */
+        .playground {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #2a2a2a 75%), linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 250px;
+        }
+        #visual-box {
+            width: 150px;
+            height: 150px;
+            background-color: #3c4043;
+            border: 2px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 新的課程內挑戰系統 --- */
+        #lesson-challenge-area {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        #start-challenge-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--success-color);
+            color: white;
+            font-weight: 600;
+        }
+        #challenge-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #challenge-input {
+            width: 100%;
+            padding: 12px;
+            font-family: var(--font-code);
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        #challenge-input:focus { outline: 2px solid var(--primary-color); }
+        #challenge-input.success { border-color: var(--success-color); }
+        #challenge-input.error { border-color: var(--error-color); }
+
+        #challenge-feedback {
+            font-size: 0.9rem;
+            min-height: 20px;
+            transition: color 0.3s;
+        }
+        #challenge-feedback.success { color: var(--success-color); }
+        #challenge-feedback.error { color: var(--error-color); }
+
+        .challenge-buttons { display: flex; gap: 10px; }
+        .challenge-buttons button { flex-grow: 1; }
+        #submit-challenge-btn { background-color: var(--primary-color); color: var(--bg-color); font-weight: 600; }
+        #next-lesson-btn { background-color: var(--success-color); color: white; }
+
+        /* 通用按鈕 */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background-color: transparent;
+            color: var(--text-secondary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            border: none;
+            text-align: center;
+        }
+        .btn:hover:not(:disabled) {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+        .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+        .command-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            padding: 12px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-code);
+            transition: all 0.2s;
+        }
+        .command-btn:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(66, 133, 244, 0.1);
+        }
+
+        /* --- RWD Media Queries --- */
+
+        /* Tablet and larger */
+        @media (min-width: 768px) {
+            #app-container {
+                width: 95vw;
+                height: 90vh;
+                max-width: 1400px;
+                border-radius: 16px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            }
+            .view { padding: 30px; }
+            #main-menu h1 { font-size: 2.5rem; }
+            .unit-selection { flex-direction: row; }
+            
+            #learn-view {
+                grid-template-columns: 300px 1fr; /* Two columns */
+                grid-template-rows: 1fr auto; /* Content | Playground Below */
+                grid-template-areas: 
+                    "sidebar insight"
+                    "sidebar playground";
+            }
+            .codex-sidebar { grid-area: sidebar; padding-bottom: 60px; }
+            .insight-panel { grid-area: insight; }
+            .playground { grid-area: playground; }
+
+             .lesson-list {
+                flex-direction: column; /* Back to vertical list */
+                gap: 5px;
+            }
+             .lesson-item { border: none; }
+        }
+
+        /* Desktop and larger */
+        @media (min-width: 1024px) {
+            .view { padding: 40px; }
+            #learn-view {
+                 /* Your original three column layout */
+                grid-template-columns: 250px 1fr 1fr;
+                grid-template-rows: 1fr; /* Reset rows */
+                gap: 30px;
+                 grid-template-areas: "sidebar insight playground"; /* Revert areas */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- View 1: Main Menu -->
+        <div id="main-menu" class="view">
+            <h1>Project Synapse</h1>
+            <p>The Interactive Codex</p>
+            <div class="unit-selection">
+                <div class="unit-card" onclick="selectUnit('CSS')">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l-7 4v8l7 4 7-4V6l-7-4zM2 12l10 6 10-6M12 22V12"/></svg>
+                    <h2>CSS</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Learning Interface -->
+        <div id="learn-view" class="view hidden">
+            <div class="codex-sidebar">
+                <h2 id="unit-title"></h2>
+                <ul id="lesson-list" class="lesson-list"></ul>
+                <button id="back-to-menu" class="btn">← Back to Menu</button>
+            </div>
+            <div class="insight-panel">
+                <h3 id="lesson-title"></h3>
+                <p id="lesson-insight"></p>
+                <div id="command-buttons" class="command-buttons"></div>
+                <!-- Area for the new challenge system -->
+                <div id="lesson-challenge-area"></div>
+            </div>
+            <div class="playground">
+                <div id="visual-box">Box</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- DOM Elements ---
+        const mainMenu = document.getElementById('main-menu');
+        const learnView = document.getElementById('learn-view');
+        const unitTitle = document.getElementById('unit-title');
+        const lessonList = document.getElementById('lesson-list');
+        const lessonTitle = document.getElementById('lesson-title');
+        const lessonInsight = document.getElementById('lesson-insight');
+        const commandButtons = document.getElementById('command-buttons');
+        const visualBox = document.getElementById('visual-box');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        const lessonChallengeArea = document.getElementById('lesson-challenge-area');
+
+        // --- State ---
+        let currentUnit = null;
+        let currentLessonIndex = 0;
+        let completedLessons = new Set();
+
+        // --- NEW Curriculum Data Structure ---
+        const curriculum = {
+            'CSS': {
+                title: 'CSS Styling',
+                lessons: [
+                    {
+                        title: 'Background Color',
+                        insight: '`background-color` 屬性設定元素的背景顏色。您可以使用顏色名稱 (如 `red`)、十六進位碼 (如 `#EA4335`) 或 RGB 值。',
+                        commands: [
+                            { label: "background-color: #4285F4;", action: () => visualBox.style.backgroundColor = '#4285F4' },
+                            { label: "background-color: #34A853;", action: () => visualBox.style.backgroundColor = '#34A853' },
+                            { label: "background-color: transparent;", action: () => visualBox.style.backgroundColor = 'transparent' },
+                        ],
+                        challenge: {
+                            prompt: "挑戰：將盒子的背景顏色設定為紅色 (`red`)。",
+                            hint: "請試著使用 `background-color` 屬性。例如：`background-color: red;`",
+                            validator: (style) => style.backgroundColor === 'red'
+                        }
+                    },
+                    {
+                        title: 'Size',
+                        insight: '`width` 和 `height` 屬性控制元素的尺寸。您可以使用像素 (`px`) 或百分比 (`%`)。',
+                        commands: [
+                            { label: "width: 200px;", action: () => visualBox.style.width = '200px' },
+                            { label: "height: 100px;", action: () => visualBox.style.height = '100px' },
+                            { label: "width: 150px; height: 150px;", action: () => { visualBox.style.width = '150px'; visualBox.style.height = '150px'; } },
+                        ],
+                        challenge: {
+                            prompt: "挑戰：將盒子的寬度設為 `220px`。",
+                            hint: "請使用 `width` 屬性並給予 `220px` 的值。",
+                            validator: (style) => style.width === '220px'
+                        }
+                    },
+                    {
+                        title: 'Border Radius',
+                        insight: '`border-radius` 可以讓元素的邊角變圓。`50%` 的值可以讓一個正方形變成完美的圓形。',
+                        commands: [
+                            { label: "border-radius: 20px;", action: () => visualBox.style.borderRadius = '20px' },
+                            { label: "border-radius: 0px;", action: () => visualBox.style.borderRadius = '0px' },
+                            { label: "border-radius: 50%;", action: () => visualBox.style.borderRadius = '50%' },
+                        ],
+                        challenge: {
+                            prompt: "挑戰：將盒子變成一個圓形。",
+                            hint: "試試看將 `border-radius` 設定為 `50%`。",
+                            validator: (style) => style.borderRadius === '50%'
+                        }
+                    },
+                    {
+                        title: 'Transform: Rotate',
+                        insight: '`transform` 屬性可以讓你修改元素的座標空間。`rotate()` 可以旋轉它。',
+                        commands: [
+                            { label: "transform: rotate(45deg);", action: () => visualBox.style.transform = 'rotate(45deg)' },
+                            { label: "transform: rotate(-10deg);", action: () => visualBox.style.transform = 'rotate(-10deg)' },
+                            { label: "transform: rotate(0deg);", action: () => visualBox.style.transform = 'rotate(0deg)' },
+                        ],
+                        challenge: {
+                            prompt: "挑戰：將盒子順時針旋轉 `15` 度 (`15deg`)。",
+                            hint: "語法是 `transform: rotate(15deg);`",
+                            validator: (style) => style.transform === 'rotate(15deg)'
+                        }
+                    },
+                ],
+                finalMessage: "恭喜！您已完成所有 CSS 基礎挑戰！"
+            }
+        };
+
+        // --- Functions ---
+        function resetVisualBox() {
+            visualBox.style.cssText = '';
+        }
+        
+        function selectLesson(index) {
+            // Can't select locked lessons
+            if (index > completedLessons.size) return;
+            currentLessonIndex = index;
+            renderLesson();
+        }
+
+        function renderLessonList() {
+            const unitData = curriculum[currentUnit];
+            lessonList.innerHTML = '';
+            unitData.lessons.forEach((lesson, index) => {
+                const li = document.createElement('li');
+                li.textContent = lesson.title;
+                li.className = 'lesson-item';
+                if (index === currentLessonIndex) li.classList.add('active');
+                if (completedLessons.has(index)) li.classList.add('completed');
+                
+                // Lock lessons that haven't been reached yet
+                if (index > completedLessons.size) {
+                    li.classList.add('locked');
+                }
+
+                li.onclick = () => selectLesson(index);
+                lessonList.appendChild(li);
+            });
+        }
+
+        function renderLesson() {
+            resetVisualBox();
+            renderLessonList();
+
+            const unitData = curriculum[currentUnit];
+            const lesson = unitData.lessons[currentLessonIndex];
+
+            lessonTitle.textContent = lesson.title;
+            lessonInsight.innerHTML = lesson.insight; // Use innerHTML to parse `<code>` tags
+            
+            // Render command buttons
+            commandButtons.innerHTML = '';
+            lesson.commands.forEach(command => {
+                const btn = document.createElement('button');
+                btn.className = 'command-btn';
+                btn.textContent = command.label;
+                btn.onclick = () => {
+                   command.action();
+                   checkChallengeLive(lesson.challenge);
+                };
+                commandButtons.appendChild(btn);
+            });
+
+            // Render challenge area
+            renderChallengeArea();
+        }
+
+        function renderChallengeArea() {
+            lessonChallengeArea.innerHTML = ''; // Clear previous
+            const lesson = curriculum[currentUnit].lessons[currentLessonIndex];
+            
+            // If this lesson is already completed, show message and Next Lesson button
+            if (completedLessons.has(currentLessonIndex)) {
+                lessonChallengeArea.innerHTML = `
+                    <p style="color: var(--success-color)">✓ 已完成!</p>
+                    <button id="next-lesson-btn" class="btn">前往下一課 →</button>
+                `;
+                const nextBtn = document.getElementById('next-lesson-btn');
+                if(currentLessonIndex >= curriculum[currentUnit].lessons.length -1){
+                     nextBtn.textContent = "完成所有課程！";
+                     nextBtn.onclick = goBackToMenu;
+                } else {
+                     nextBtn.onclick = () => selectLesson(currentLessonIndex + 1);
+                }
+                return;
+            }
+
+            // Otherwise, show the challenge input
+            lessonChallengeArea.innerHTML = `
+                <h4>${lesson.challenge.prompt}</h4>
+                <div id="challenge-input-container">
+                    <input type="text" id="challenge-input" placeholder="在這裡輸入 CSS 屬性...">
+                    <div id="challenge-feedback"></div>
+                </div>
+            `;
+            const challengeInput = document.getElementById('challenge-input');
+            challengeInput.oninput = () => checkChallengeLive(lesson.challenge);
+            challengeInput.focus();
+        }
+        
+        // This function checks the answer WITHOUT user clicking submit, providing live feedback.
+        function checkChallengeLive(challenge) {
+            const input = document.getElementById('challenge-input');
+            const feedback = document.getElementById('challenge-feedback');
+
+            if (!input || !feedback) return;
+
+            const tempBox = document.createElement('div');
+            try {
+                // 只套用 input.value，不要混 visualBox.style
+                tempBox.style.cssText = input.value;
+            } catch (e) { /* ignore invalid css for live typing */ }
+
+            if (challenge.validator(tempBox.style)) {
+                input.classList.remove('error');
+                input.classList.add('success');
+                input.disabled = true; // Lock input
+                feedback.textContent = '太棒了，正確！';
+                feedback.className = 'success';
+
+                completedLessons.add(currentLessonIndex);
+
+                setTimeout(() => {
+                    renderLessonList();
+                    renderChallengeArea(); // Re-render to show Next Lesson button
+                }, 1000);
+
+            } else {
+                input.classList.remove('success');
+                if(input.value.length > 3) { // Only show error/hint if user typed something
+                    input.classList.add('error');
+                    feedback.textContent = challenge.hint;
+                    feedback.className = 'error';
+                } else {
+                    input.classList.remove('error');
+                    feedback.textContent = '';
+                }
+            }
+        }
+
+
+        function selectUnit(unitKey) {
+            currentUnit = unitKey;
+            currentLessonIndex = 0;
+            completedLessons.clear();
+            
+            unitTitle.textContent = curriculum[unitKey].title;
+            
+            mainMenu.classList.add('hidden');
+            learnView.classList.remove('hidden');
+            
+            selectLesson(0);
+        }
+
+        function goBackToMenu() {
+            currentUnit = null;
+            learnView.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+            resetVisualBox();
+        }
+
+        // --- Event Listeners ---
+        backToMenuBtn.addEventListener('click', goBackToMenu);
+
+    </script>
+</body>
+</html>
