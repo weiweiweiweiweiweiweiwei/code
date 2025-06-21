@@ -736,7 +736,7 @@
 <body>
     <div id="app-container">
         <div id="main-menu" class="view">
-            <h1>Code courses</h1>
+            <h1>Project Synapse</h1>
             <p>互動式前端程式碼學習平台</p>
             <div class="unit-selection">
                 <div class="unit-card-container">
@@ -1040,9 +1040,9 @@
                         </ul>
                     `,
                             commands: [
-                                { label: "p { color: blue; }", action: (el) => { el.innerHTML = '<p>這段文字會變藍。</p><style>p{color:blue;}</style>'; } },
-                                { label: ".highlight { background: yellow; }", action: (el) => { el.innerHTML = '<p class="highlight">這段文字會被標亮。</p><style>.highlight{background:yellow; color:black;}</style>'; } },
-                                { label: "#header { font-size: 24px; }", action: (el) => { el.innerHTML = '<h1 id="header">這個標題會變大。</h1><style>#header{font-size:24px;}</style>'; } }
+                                { label: "p { color: pink; }", action: (el) => { el.innerHTML = '<p style="color:pink;">這段文字會變粉。</p>'; } },
+                                { label: ".highlight { background: yellow; }", action: (el) => { el.innerHTML = '<p style="background:yellow; color:black;">這段文字會被標亮。</p>'; } },
+                                { label: "#header { font-size: 24px; }", action: (el) => { el.innerHTML = '<h1 style="font-size:24px;">這個標題會變大。</h1>'; } }
                             ],
                             challenge: {
                                 prompt: "挑戰：讓盒子的背景顏色設定為紅色 (`red`)。",
