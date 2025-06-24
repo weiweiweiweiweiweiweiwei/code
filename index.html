@@ -4,1148 +4,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn code</title>
+    <title>Project Synapse - 互動式前端學習平台</title>
     <meta name="description" content="一個透過互動式挑戰來學習基礎 HTML 與 CSS 的網頁程式碼教學平台。">
-    <link rel="icon" href="https://raw.githubusercontent.com/weiweiweiweiweiweiweiwei/code/35ca6cf11ff496626a4b940b2cb6ceba9fde2027/cloud-svgrepo-com.svg"   type="image/x-icon">
+    
+    <!-- Favicon and Fonts -->
+    <link rel="icon" href="https://raw.githubusercontent.com/weiweiweiweiweiweiweiwei/code/35ca6cf11ff496626a4b940b2cb6ceba9fde2027/cloud-svgrepo-com.svg" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Fira+Code:wght@400;500&family=Noto+Serif+TC:wght@400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Fira+Code:wght@400;500&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- CodeMirror Assets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/neat.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- External JavaScript with defer -->
     <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #8ab4f8;
-            --success-color: #34A853;
-            --success-bg: rgba(52, 168, 83, 0.1);
-            --error-color: #EA4335;
-            --error-bg: rgba(234, 67, 53, 0.1);
-            --bg-color: #131314;
-            --surface-color: #1e1f20;
-            --surface-light: #2a2b2c;
-            --text-color: #e8eaed;
-            --text-secondary-color: #9aa0a6;
-            --border-color: #3c4043;
-            --font-primary: 'Poppins', sans-serif;
-            --font-code: 'Fira Code', monospace;
-            --font-document: 'Noto Serif TC', serif;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            text-rendering: optimizeLegibility;
-            font-family: var(--font-primary);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #4a4d50;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: var(--primary-color);
-        }
-
-        #app-container {
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-color);
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .view {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .view.hidden-view {
-            display: block;
-            opacity: 0;
-            pointer-events: none;
-            position: absolute;
-            z-index: -1;
-        }
-
-        #main-menu.view:not(.hidden-view) {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-            pointer-events: auto;
-            position: static;
-            z-index: 1;
-        }
-
-        #learn-view.view:not(.hidden-view),
-        #quiz-page-container.view:not(.hidden-view) {
-            display: flex;
-            flex-direction: column;
-            opacity: 1;
-            pointer-events: auto;
-            position: static;
-            z-index: 1;
-        }
-
-        #main-menu {
-            text-align: center;
-            padding: 20px;
-        }
-
-        #main-menu h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        #main-menu p {
-            color: var(--text-secondary-color);
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-
-        .unit-selection {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            width: 90%;
-            max-width: 380px;
-        }
-
-        .unit-card-container {
-            position: relative;
-        }
-
-        .reset-progress-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: var(--text-secondary-color);
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-            transition: background-color 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .reset-progress-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-        }
-
-        .reset-progress-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .unit-card {
-            background: none;
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            font: inherit;
-            color: inherit;
-            text-align: left;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .unit-card:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            transform: translateY(-5px);
-        }
-
-        .unit-card h2 {
-            margin: 0;
-            font-size: 1.1em;
-            margin-right: 24px;
-        }
-
-        .unit-card svg {
-            flex-shrink: 0;
-            width: 40px;
-            height: 40px;
-        }
-
-        #learn-view {
-            display: flex;
-            flex-direction: column;
-        }
-
-        #top-navbar {
-            background-color: var(--bg-color);
-            padding: 0 20px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            height: 56px;
-        }
-
-        #home-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: inherit;
-            border-radius: 8px;
-            padding: 8px 12px;
-            transition: background-color 0.2s;
-        }
-
-        #home-link:hover {
-            background-color: var(--surface-color);
-        }
-
-        #home-link svg {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        #navbar-title {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 500;
-        }
-
-        #panels-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 10px;
-            overflow: hidden;
-        }
-
-        .panel {
-            background-color: var(--surface-color);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #28292a;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
-            user-select: none;
-            height: 48px;
-        }
-
-        #codex-panel .panel-header,
-        #playground-panel .panel-header {
-            padding: 8px 12px;
-        }
-
-        .panel-header h3 {
-            margin: 0;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 500;
-            transition: max-width 0.4s ease, opacity 0.3s ease;
-        }
-
-        .panel-content {
-            overflow-y: auto;
-            height: 100%;
-        }
-
-        .collapse-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary-color);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .collapse-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-        }
-
-        .collapse-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .progress-container {
-            margin-bottom: 10px;
-            padding: 10px 15px 0 15px;
-            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease, margin 0.4s ease;
-            overflow: hidden;
-            max-height: 100px;
-        }
-
-        .progress-text {
-            font-size: 0.9em;
-            color: var(--text-secondary-color);
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .progress-bar-bg {
-            background-color: #333;
-            border-radius: 4px;
-            height: 8px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fg {
-            background-color: var(--success-color);
-            width: 0%;
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-
-        #codex-panel .panel-content {
-            padding: 15px;
-        }
-
-        .lesson-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .lesson-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 18px 0;
-            border-radius: 0;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            color: var(--text-secondary-color);
-            font-weight: 300;
-            border-bottom: 1px solid var(--border-color);
-            margin: 20px 0;
-        }
-
-        .lesson-item:last-child {
-            border-bottom: none;
-        }
-
-        .lesson-icon-container {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .lesson-text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: max-width 0.4s ease, opacity 0.3s ease, margin 0.4s ease;
-            max-width: 200px;
-            margin-left: 0;
-        }
-
-        .lesson-item.active {
-            color: var(--text-color);
-        }
-
-        .lesson-item.active .lesson-icon-container {
-            border-color: var(--primary-color);
-            color: var(--text-color);
-        }
-
-        .lesson-item.completed {
-            color: var(--text-color);
-        }
-
-        .lesson-item.completed .lesson-icon-container {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-            color: white;
-        }
-
-        .lesson-item.locked {
-            cursor: not-allowed;
-            color: #666;
-            opacity: 0.6;
-        }
-
-        .lesson-item.locked:hover {
-            background-color: transparent;
-        }
-
-        .lesson-item.locked .lesson-icon-container {
-            border-color: #444;
-            color: #666;
-        }
-
-        #insight-panel .panel-header {
-            padding: 0;
-            justify-content: flex-start;
-        }
-
-        .insight-tabs {
-            display: flex;
-            width: 100%;
-        }
-
-        .tab-btn {
-            position: relative;
-            flex: 1;
-            padding: 12px;
-            background-color: #28292a;
-            border: none;
-            color: var(--text-secondary-color);
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-
-        .tab-btn.active {
-            color: var(--text-color);
-        }
-
-        .tab-btn::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 3px;
-            background-color: var(--primary-color);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .tab-btn.active::after {
-            width: 30px;
-        }
-
-        .tab-btn:hover:not(.active) {
-            color: var(--text-color);
-        }
-
-        #insight-panel .panel-content {
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .tab-content {
-            height: 100%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #lesson-scrollable-content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-
-        #challenge-content-tab {
-            padding: 20px;
-        }
-
-        #go-to-challenge-btn {
-            flex-shrink: 0;
-            margin: 200px 20px 40px 20px;
-            width: calc(100% - 40px);
-        }
-
-        #lesson-title {
-            margin-top: 0;
-            margin-bottom: 24px;
-            font-size: 1.8em;
-        }
-
-        #lesson-insight p,
-        #lesson-insight li {
-            font-size: 1.05em;
-            line-height: 1.8;
-            margin-bottom: 1.2em;
-        }
-
-        #lesson-insight h4,
-        #lesson-insight h5 {
-            margin-top: 2em;
-            margin-bottom: 1em;
-            font-size: 1.4em;
-        }
-
-        #lesson-insight code {
-            background-color: rgba(138, 180, 248, 0.15);
-            color: #a7c5f8;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-family: var(--font-code);
-            font-size: 0.9em;
-        }
-
-        .command-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            margin: 10px 0;
-            padding: 12px;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: var(--font-code);
-            transition: border-color 0.2s, background-color 0.2s;
-        }
-
-        .command-btn.active-command {
-            background-color: #2c2c2e;
-            border-color: var(--primary-color);
-        }
-
-        #challenge-input {
-            width: 100%;
-            padding: 12px;
-            font-family: var(--font-code);
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-top: 10px;
-            resize: vertical;
-            min-height: 200px;
-            line-height: 1.5;
-        }
-
-        #challenge-input.success {
-            border-color: var(--success-color);
-        }
-
-        #challenge-input.error {
-            border-color: var(--error-color);
-        }
-
-        #challenge-feedback {
-            font-size: 0.9rem;
-            min-height: 20px;
-            margin-top: 8px;
-        }
-
-        .btn {
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            text-align: center;
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-            transition: all 0.2s;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            background-color: var(--border-color);
-            cursor: not-allowed;
-            color: var(--text-secondary-color);
-        }
-
-        #next-lesson-btn {
-            width: 100%;
-        }
-
-        /* FIX: Make next lesson button full width */
-        .shimmer {
-            animation: shimmer 2s infinite;
-            background: linear-gradient(to right, var(--success-color) 40%, #a2e8b8 50%, var(--success-color) 60%);
-            background-size: 200% 100%;
-            color: #111 !important;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: 100% 0;
-            }
-
-            100% {
-                background-position: -100% 0;
-            }
-        }
-
-        #css-playground,
-        #html-sandbox {
-            height: 100%;
-            width: 100%;
-            display: flex;
-        }
-
-        #css-playground {
-            justify-content: center;
-            align-items: center;
-            background-image: linear-gradient(45deg, #2a2a2a 25%, transparent 25%), linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #2a2a2a 75%), linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-            background-size: 20px 20px;
-            padding: 10px;
-            flex-wrap: wrap;
-        }
-
-        #visual-box {
-            width: 150px;
-            height: 150px;
-            background-color: #3c4043;
-            border: 2px solid var(--border-color);
-            font-size: 1.2rem;
-            transition: all 0.5s;
-            color: white;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .content-box-inner {
-            background: #8ab4f8;
-            color: black;
-            font-size: 0.9em;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #html-sandbox {
-            background-color: white;
-            color: #333;
-            font-family: var(--font-document);
-            padding: 20px;
-            overflow: auto;
-            display: block;
-        }
-
-        .box-model-sibling {
-            width: 60px;
-            height: 150px;
-            background-color: #28292a;
-            border: 2px dashed var(--border-color);
-            margin-left: 20px;
-            color: var(--text-secondary-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.8em;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .flex-item {
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary-color);
-            border-radius: 8px;
-            margin: 5px;
-        }
-
-        /* QUIZ STYLES (Scoped with #quiz-page-container) */
-        #quiz-page-container {
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        #quiz-page-container .page-container {
-            width: 100%;
-            max-width: 900px;
-            height: 100%;
-            max-height: 95vh;
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        #quiz-page-container .btn {
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        #quiz-page-container .btn.secondary {
-            background-color: var(--surface-light);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-        }
-
-        #quiz-page-container #quiz-home-btn {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        #quiz-page-container .quiz-header {
-            padding: 15px 25px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--surface-light);
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #quiz-page-container .quiz-header h1 {
-            margin: 0;
-            font-size: 1.25rem;
-        }
-
-        #quiz-page-container .quiz-header p {
-            margin: 4px 0 0;
-            font-size: 0.9rem;
-            color: var(--text-secondary-color);
-        }
-
-        #quiz-page-container #quiz-view {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        #quiz-page-container #question-area-wrapper {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 30px 25px;
-        }
-
-        #quiz-page-container .quiz-navigation {
-            flex-shrink: 0;
-            padding: 15px 25px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #quiz-page-container #question-prompt {
-            margin: 0 0 30px 0;
-            font-size: 1.25rem;
-            line-height: 1.7;
-        }
-
-        #quiz-page-container #question-prompt code {
-            font-family: var(--font-code);
-            background-color: var(--bg-color);
-            padding: 3px 8px;
-            border-radius: 6px;
-        }
-
-        #quiz-page-container .mc-options-container {
-            display: grid;
-            gap: 15px;
-            grid-template-columns: 1fr;
-        }
-
-        #quiz-page-container .mc-options-container.grid-2x2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        @media (max-width: 600px) {
-
-            #quiz-page-container .mc-options-container,
-            #quiz-page-container .mc-options-container.grid-2x2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        #quiz-page-container .mc-option input[type="radio"] {
-            display: none;
-        }
-
-        #quiz-page-container .mc-option label {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            min-height: 60px;
-            background-color: var(--surface-light);
-            border: 2px solid transparent;
-            padding: 15px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            justify-content: flex-start;
-            text-align: left;
-        }
-
-        #quiz-page-container .mc-options-container.grid-2x2 .mc-option label {
-            justify-content: center;
-            text-align: center;
-        }
-
-        #quiz-page-container .mc-option label code {
-            font-family: var(--font-code);
-        }
-
-        #quiz-page-container #quiz-view:not(.is-review) .mc-option label {
-            cursor: pointer;
-        }
-
-        #quiz-page-container #quiz-view:not(.is-review) .mc-option label:hover {
-            border-color: var(--border-color);
-        }
-
-        #quiz-page-container #quiz-view:not(.is-review) .mc-option input[type="radio"]:checked+label {
-            border-color: var(--primary-color);
-        }
-
-        #quiz-page-container .text-input-container textarea {
-            width: 100%;
-            height: 180px;
-            padding: 15px;
-            font-family: var(--font-code);
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        #quiz-page-container #quiz-view:not(.is-review) .text-input-container textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        #quiz-page-container #quiz-view.is-review .mc-option label {
-            opacity: 0.8;
-        }
-
-        #quiz-page-container #quiz-view.is-review .mc-option label.user-correct,
-        #quiz-page-container #quiz-view.is-review .mc-option label.user-incorrect,
-        #quiz-page-container #quiz-view.is-review .mc-option label.true-correct {
-            opacity: 1;
-        }
-
-        #quiz-page-container #quiz-view.is-review .mc-option label.user-correct {
-            border-color: var(--success-color);
-            background-color: var(--success-bg);
-        }
-
-        #quiz-page-container #quiz-view.is-review .mc-option label.user-incorrect {
-            border-color: var(--error-color);
-            background-color: var(--error-bg);
-        }
-
-        #quiz-page-container #quiz-view.is-review .mc-option label.true-correct {
-            border-color: var(--success-color);
-        }
-
-        #quiz-page-container #quiz-view.is-review .text-input-container textarea.correct-text {
-            border-color: var(--success-color);
-        }
-
-        #quiz-page-container #quiz-view.is-review .text-input-container textarea.incorrect-text {
-            border-color: var(--error-color);
-        }
-
-        #quiz-page-container #question-feedback-area {
-            margin-top: 30px;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-        #quiz-page-container #question-feedback-area.correct p {
-            color: var(--success-color);
-        }
-
-        #quiz-page-container #question-feedback-area.incorrect p {
-            color: var(--error-color);
-        }
-
-        #quiz-page-container #correct-answer-display {
-            margin-top: 15px;
-        }
-
-        #quiz-page-container #correct-answer-display strong {
-            color: var(--text-color);
-        }
-
-        #quiz-page-container #correct-answer-display code {
-            display: block;
-            margin-top: 8px;
-            background-color: var(--bg-color);
-            padding: 12px;
-            border-radius: 6px;
-            color: var(--text-secondary-color);
-            white-space: pre-wrap;
-            word-break: break-all;
-            border: 1px solid var(--border-color);
-        }
-
-        #quiz-page-container #results-view {
-            padding: 40px;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #quiz-page-container #final-score-circle {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: conic-gradient(from 0deg, var(--success-color) 0%, var(--bg-color) 0%);
-            transition: background 1s ease-out;
-        }
-
-        #quiz-page-container #final-score-circle .score-text {
-            font-size: 4rem;
-            font-weight: 700;
-        }
-
-        #quiz-page-container #final-score-circle .score-label {
-            font-size: 1.1rem;
-            color: var(--text-secondary-color);
-        }
-
-        #quiz-page-container #results-summary-title {
-            font-size: 2rem;
-            margin: 20px 0 10px;
-        }
-
-        #quiz-page-container #results-summary-text {
-            font-size: 1.1rem;
-            color: var(--text-secondary-color);
-            max-width: 400px;
-            margin: 0 auto 30px;
-        }
-
-        #quiz-page-container #results-view .quiz-navigation {
-            justify-content: center;
-            border-top: none;
-            gap: 15px;
-        }
-
-        @media (min-width: 769px) {
-            #panels-container {
-                flex-direction: row;
-            }
-
-            .panel {
-                height: 100%;
-                border-radius: 8px;
-            }
-
-            .collapse-btn {
-                display: flex;
-            }
-
-            .gutter {
-                background-color: transparent;
-                position: relative;
-            }
-
-            .gutter.gutter-horizontal {
-                cursor: col-resize;
-                width: 5px;
-            }
-
-            .gutter.gutter-horizontal::before {
-                content: '';
-                position: absolute;
-                left: 2px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 2px;
-                height: 30px;
-                background-color: var(--border-color);
-                border-radius: 2px;
-                transition: background-color 0.2s;
-            }
-
-            .gutter:hover::before {
-                background-color: var(--primary-color);
-            }
-
-            .is-collapsed .panel-header h3 {
-                max-width: 0;
-                opacity: 0;
-            }
-
-            .is-collapsed .progress-container,
-            .is-collapsed #back-to-menu-container {
-                max-height: 0;
-                opacity: 0;
-                padding-top: 0;
-                padding-bottom: 0;
-                margin-bottom: 0;
-                border: none;
-            }
-
-            .is-collapsed .lesson-text {
-                max-width: 0;
-                opacity: 0;
-                margin-left: -12px;
-            }
-
-            .is-collapsed .lesson-list {
-                padding-top: 15px;
-            }
-
-            .is-collapsed .lesson-item {
-                gap: 0;
-                justify-content: center;
-                width: 100%;
-                padding: 5px 0;
-                border-bottom: none;
-            }
-
-            .is-collapsed>.panel-content {
-                padding-left: 0;
-                padding-right: 0;
-            }
-        }
-    </style>
+    <script src="script.js" defer></script>
 </head>
 
 <body>
     <div id="app-container">
         <!-- Main Menu View -->
-        <div id="main-menu" class="view">
+        <div id="main-menu" class="view is-active">
             <h1>Project Synapse</h1>
             <p>互動式前端程式碼學習平台</p>
             <div class="unit-selection">
-                <div class="unit-card-container"><button class="unit-card" onclick="selectUnit('HTML')"><svg width="48"
-                            height="48" viewBox="0 0 24 24" fill="none" stroke="#E34F26" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 6l-4 6 4 6" />
-                            <path d="M16 6l4 6-4 6" />
+                <div class="unit-card-container">
+                    <button class="unit-card" data-unit-key="HTML">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#E34F26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 6l-4 6 4 6" /><path d="M16 6l4 6-4 6" />
                         </svg>
                         <h2>基礎 HTML</h2>
-                    </button><button class="reset-progress-btn" data-unit-key="HTML" aria-label="重設 HTML 進度"><svg
-                            viewBox="0 0 24 24">
-                            <path fill="currentColor"
-                                d="M12,4A8,8 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A6,6 0 0,1 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18C10.67,18 9.5,17.39 8.69,16.4L7.28,17.8C8.5,19.19 10.16,20 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" />
-                        </svg></button></div>
-                <div class="unit-card-container"><button class="unit-card" onclick="selectUnit('CSS')"><svg width="48"
-                            height="48" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2l-7 4v8l7 4 7-4V6l-7-4zM2 12l10 6 10-6M12 22V12" />
+                    </button>
+                    <button class="reset-progress-btn" data-unit-key="HTML" aria-label="重設 HTML 進度">
+                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,4A8,8 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A6,6 0 0,1 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18C10.67,18 9.5,17.39 8.69,16.4L7.28,17.8C8.5,19.19 10.16,20 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" /></svg>
+                    </button>
+                </div>
+                <div class="unit-card-container">
+                    <button class="unit-card" data-unit-key="CSS">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1572B6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M7 10l5 5 5-5" /> <path d="M7 15l5-5 5 5" />
                         </svg>
                         <h2>基礎 CSS</h2>
-                    </button><button class="reset-progress-btn" data-unit-key="CSS" aria-label="重設 CSS 進度"><svg
-                            viewBox="0 0 24 24">
-                            <path fill="currentColor"
-                                d="M12,4A8,8 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A6,6 0 0,1 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18C10.67,18 9.5,17.39 8.69,16.4L7.28,17.8C8.5,19.19 10.16,20 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" />
-                        </svg></button></div>
-                <div class="unit-card-container"><button class="unit-card" onclick="selectQuiz()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800px" height="800px" viewBox="0 0 32 32" version="1.1" webcrx="">
-<path fill="#f4f4f6" d="M21.652 3.098h-16.955v26.375h22.607v-20.723l-5.652-5.652zM25.42 27.589h-18.839v-22.607h13.188l5.652 5.652v16.955zM12.269 11.851l-3.644 4.434 3.644 4.434 0.862-1.417-2.455-3.017 2.455-3.017zM13.863 20.614h1.599l2.542-8.681h-1.599zM19.731 11.851l-0.862 1.418 2.455 3.017-2.455 3.017 0.862 1.418 3.644-4.434z"/>
-</svg>
+                    </button>
+                    <button class="reset-progress-btn" data-unit-key="CSS" aria-label="重設 CSS 進度">
+                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,4A8,8 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A6,6 0 0,1 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18C10.67,18 9.5,17.39 8.69,16.4L7.28,17.8C8.5,19.19 10.16,20 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" /></svg>
+                    </button>
+                </div>
+                <div class="unit-card-container">
+                    <button class="unit-card" id="start-quiz-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 32 32" version="1.1">
+                            <path fill="currentColor" d="M21.652 3.098h-16.955v26.375h22.607v-20.723l-5.652-5.652zM25.42 27.589h-18.839v-22.607h13.188l5.652 5.652v16.955zM12.269 11.851l-3.644 4.434 3.644 4.434 0.862-1.417-2.455-3.017 2.455-3.017zM13.863 20.614h1.599l2.542-8.681h-1.599zM19.731 11.851l-0.862 1.418 2.455 3.017-2.455 3.017 0.862 1.418 3.644-4.434z"/>
+                        </svg>
                         <h2>總測驗</h2>
-                    </button></div>
+                    </button>
+                </div>
             </div>
         </div>
+
         <!-- Learn View -->
-        <main id="learn-view" class="view hidden-view">
-            <nav id="top-navbar"><a href="#" id="home-link" aria-label="返回主選單"><svg viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path fill="currentColor"
-                            d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
-                    </svg>
+        <main id="learn-view" class="view">
+            <nav id="top-navbar">
+                <a href="#" id="home-link" aria-label="返回主選單">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
                     <h2 id="navbar-title"></h2>
-                </a></nav>
+                </a>
+                <div class="navbar-spacer"></div>
+                 <!-- Settings Button and Dropdown -->
+                <div class="settings-container">
+                    <button id="settings-btn" class="icon-btn" aria-label="設定">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.44,0.17-0.48,0.41L9.2,5.15C8.61,5.39,8.08,5.71,7.58,6.09L5.19,5.13C4.97,5.06,4.72,5.13,4.6,5.33L2.68,8.65 c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C4.78,11.36,4.76,11.67,4.76,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.34 c0.04,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.48-0.41l0.36-2.34c0.59-0.24,1.12-0.56,1.62-0.94l2.39,0.96 c0.22,0.07,0.47,0,0.59-0.22l1.92-3.32c0.12-0.2,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"></path></svg>
+                    </button>
+                    <div id="settings-dropdown" class="dropdown-menu hidden">
+                        <div class="dropdown-header">外觀</div>
+                        <button class="dropdown-item" data-theme="light">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0m-5 0h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7l-.7.7m0 11.4l.7.7m-12.1-.7l-.7.7"></path></svg>
+                            淺色模式
+                        </button>
+                        <button class="dropdown-item" data-theme="dark">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-labelledby="moonIconTitle" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none" webcrx=""> <title id="moonIconTitle">Moon</title> <path d="M10.423839,3 C10.1490474,3.80837289 10,4.67486099 10,5.57616098 C10,9.99443898 13.581722,13.576161 18,13.576161 C18.9013,13.576161 19.7677881,13.4271135 20.576161,13.152322 C19.5038921,16.3066875 16.516978,18.576161 13,18.576161 C8.581722,18.576161 5,14.994439 5,10.576161 C5,7.05918297 7.26947343,4.07226889 10.423839,3 Z"/> </svg>
+                            深色模式
+                        </button>
+                        <button class="dropdown-item" data-theme="system">
+                             <svg width="256px" height="256px" viewBox="0 0 15.00 15.00" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1   " transform="matrix(-1, 0, 0, 1, 0, 0)rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="m2 13.2H13M0.5 2.5L0.5 10.5C0.5 11.0523 0.947716 11.5 1.5 11.5L13.5 11.5C14.0523 11.5 14.5 11.0523 14.5 10.5V2.5C14.5 1.94772 14.0523 1.5 13.5 1.5L1.5 1.5C0.947716 1.5 0.5 1.94772 0.5 2.5Z"></path> </g></svg>
+                            裝置
+                        </button>
+                    </div>
+                </div>
+            </nav>
             <div id="panels-container">
                 <div id="codex-panel" class="panel">
                     <div class="panel-header">
-                        <h3 id="unit-title-header">Codex</h3><button class="collapse-btn" id="collapse-codex"
-                            aria-label="收合課程面板"><svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path fill="currentColor"
-                                    d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
-                            </svg></button>
+                        <h3 id="unit-title-header">目錄</h3>
+                        <button class="collapse-btn" id="collapse-codex" aria-label="收合課程面板">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+                        </button>
                     </div>
                     <div class="panel-content">
                         <div class="progress-container">
                             <div class="progress-text"><span>進度</span><span id="progress-percentage">0%</span></div>
-                            <div class="progress-bar-bg">
-                                <div id="progress-bar-fg" class="progress-bar-fg"></div>
-                            </div>
+                            <div class="progress-bar-bg"><div id="progress-bar-fg" class="progress-bar-fg"></div></div>
                         </div>
                         <ul id="lesson-list" class="lesson-list"></ul>
                     </div>
                 </div>
                 <div id="insight-panel" class="panel">
-                    <div class="panel-header insight-tabs"><button id="tab-insight"
-                            class="tab-btn active">教學內容</button><button id="tab-challenge" class="tab-btn">挑戰</button>
+                    <div class="panel-header insight-tabs">
+                        <button id="tab-insight" class="tab-btn active">教學</button>
+                        <button id="tab-challenge" class="tab-btn">挑戰</button>
                     </div>
                     <div class="panel-content">
                         <div id="insight-content-tab" class="tab-content">
@@ -1153,7 +127,8 @@
                                 <h3 id="lesson-title"></h3>
                                 <div id="lesson-insight"></div>
                                 <div id="command-buttons"></div>
-                            </div><button id="go-to-challenge-btn" class="btn">來點挑戰吧</button>
+                            </div>
+                            <button id="go-to-challenge-btn" class="btn">來點挑戰吧</button>
                         </div>
                         <div id="challenge-content-tab" class="tab-content hidden">
                             <div id="lesson-challenge-area"></div>
@@ -1161,20 +136,18 @@
                     </div>
                 </div>
                 <div id="playground-panel" class="panel">
-                    <div class="panel-header">
-                        <h3>範例</h3>
-                    </div>
+                    <div class="panel-header"><h3>範例</h3></div>
                     <div class="panel-content" style="padding:0;">
-                        <div id="css-playground" class="hidden">
-                            <div id="visual-box">Box</div>
-                        </div>
-                        <div id="html-sandbox" class="hidden"></div>
+                        <div id="css-playground" class="hidden"><div id="visual-box">Box</div></div>
+                        <!-- THIS IS NOW AN IFRAME FOR SECURITY AND LIVE PREVIEW -->
+                        <iframe id="html-sandbox" class="hidden"></iframe>
                     </div>
                 </div>
             </div>
         </main>
+
         <!-- Quiz View -->
-        <main id="quiz-page-container" class="view hidden-view">
+        <main id="quiz-page-container" class="view">
             <div class="page-container">
                 <header class="quiz-header">
                     <div>
@@ -1195,8 +168,7 @@
                     </nav>
                 </main>
                 <main id="results-view" class="hidden">
-                    <div id="final-score-circle"><span class="score-text" id="final-score-text"></span><span
-                            class="score-label">得分</span></div>
+                    <div id="final-score-circle"><span class="score-text" id="final-score-text"></span><span class="score-label">得分</span></div>
                     <h2 id="results-summary-title"></h2>
                     <p id="results-summary-text"></p>
                     <nav class="quiz-navigation">
@@ -1207,289 +179,5 @@
             </div>
         </main>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ---- Main App Elements ----
-            const mainMenu = document.getElementById("main-menu"), learnView = document.getElementById("learn-view"), quizPageContainer = document.getElementById("quiz-page-container"), unitTitleHeader = document.getElementById("unit-title-header"), lessonList = document.getElementById("lesson-list"), lessonTitle = document.getElementById("lesson-title"), lessonInsight = document.getElementById("lesson-insight"), commandButtons = document.getElementById("command-buttons"), lessonChallengeArea = document.getElementById("lesson-challenge-area"), cssPlayground = document.getElementById("css-playground"), visualBox = document.getElementById("visual-box"), htmlSandbox = document.getElementById("html-sandbox"), progressBarFg = document.getElementById("progress-bar-fg"), progressPercentage = document.getElementById("progress-percentage"), navbarTitle = document.getElementById("navbar-title"), homeLink = document.getElementById("home-link");
-            const panels = { codex: document.getElementById("codex-panel"), insight: document.getElementById("insight-panel"), playground: document.getElementById("playground-panel") };
-            const tabInsight = document.getElementById('tab-insight'), tabChallenge = document.getElementById('tab-challenge'), insightContentTab = document.getElementById('insight-content-tab'), challengeContentTab = document.getElementById('challenge-content-tab'), goToChallengeBtn = document.getElementById('go-to-challenge-btn');
-            let currentUnit = null, currentLessonIndex = 0, completedLessons = new Set, splitInstance = null, activeHtmlContent = {};
-            const GutterSize = 5, NumPanels = 3;
-
-            // ---- Main App Curriculum Data ----
-            const curriculum = {
-                'HTML': {
-                    title: '基礎 HTML',
-                    lessons: [
-                        {
-                            title: '標題、段落與語意',
-                            insight: `<h4>核心概念：結構與語意</h4><p>HTML 的核心是使用「標籤」(Tag) 來賦予內容不同的「語意」(Semantic)。這不僅是為了顯示，更是為了讓瀏覽器、搜尋引擎和輔助工具（如螢幕閱讀器）能理解你網頁的結構。</p><h4>標題 (Headings)</h4><p>標題從 <code>&lt;h1&gt;</code> 到 <code>&lt;h6&gt;</code>，代表了六個層級的重要性。一個頁面通常只應該有一個 <code>&lt;h1&gt;</code> 作為主標題，這對 SEO (搜尋引擎優化) 至關重要。</p><h4>段落</h4><p><code>&lt;p&gt;</code> (Paragraph) 用於定義一個獨立的文字段落。</p><p>試著點擊下方不同群組的按鈕，看看它們如何疊加顯示在右方的預覽區吧！</p>`,
-                            commands: [
-                                { group: '主標題 <h1>', label: "<h1>最重要的主標題</h1>", content: '<h1>最重要的主標題</h1>' },
-                                { group: '主標題 <h1>', label: "<h1>通常一個頁面只會有一個&lt;h1&gt;標題</h1>", content: '<h1>通常一個頁面只會有一個&lt;h1&gt;標題</h1>' },
-                                { group: '副標題 <h2>', label: "<h2>一個大標題</h2>", content: '<h2>一個大標題</h2>' },
-                                { group: '副標題 <h2>', label: "<h2>可用於文章排版</h2>", content: '<h2>可用於文章排版</h2>' },
-                                { group: '副標題 <h3>', label: "<h3>一個副標題</h3>", content: '<h3>一個副標題</h3>' },
-                                { group: '副標題 <h3>', label: "<h3>可用於文章排版</h3>", content: '<h3>可用於文章排版</h3>' },
-                                { group: '段落 <p>', label: "<p>這是一個用來解釋內容的段落。</p>", content: '<p>這是一個用來解釋內容的段落。</p>' },
-                                { group: '段落 <p>', label: "<p>所以這個段落通常會很長。<br>所以這個段落通常會很長。<br>所以這個段落通常會很長。</p>", content: '<p>所以這個段落通常會很長。<br>所以這個段落通常會很長。<br>所以這個段落通常會很長。</p>' },
-                            ],
-                            challenge: { prompt: "挑戰：建立一個 &lt;h2&gt; 標題，內容為「我的第一個網頁」，並在其下方新增一個段落，內容是「用 HTML 寫成」。", hint: "你需要一個 <h2> 標籤，緊接著一個 <p> 標籤。", validator: (el) => { const h2 = el.querySelector('h2'); const p = el.querySelector('p'); return h2 && h2.textContent.trim() === '我的第一個網頁' && p && p.textContent.trim() === '用 HTML 寫成'; } }
-                        },
-                        {
-                            title: '清單 (Lists)',
-                            insight: `<h4>為什麼要用清單？</h4><p>當你有一組相關的項目時，使用清單標籤可以讓它們在語意上成為一個群組，這比單純用 <code>&lt;p&gt;</code> 標籤更有結構性。</p><ul><li><code>&lt;ul&gt;</code> (Unordered List)： 無序清單，用於項目的順序不重要的場合，例如購物清單。預設樣式是項目符號。</li><li><code>&lt;ol&gt;</code> (Ordered List)： 有序清單，用於步驟或排名等順序很重要的場合。預設樣式是數字。</li></ul><p>無論是哪種清單，清單項目都必須使用 <code>&lt;li&gt;</code> (List Item) 標籤包覆。清單甚至可以互相嵌套，以建立更複雜的層級結構。</p>`,
-                            commands: [
-                                { group: '無序清單', label: "購物清單", content: '<h4>購物清單</h4><ul><li>牛奶</li><li>麵包</li><li>雞蛋</li></ul>' },
-                                { group: '無序清單', label: "待辦事項", content: '<h4>待辦事項</h4><ul><li>完成 HTML 學習</li><li>學習 CSS</li></ul>' },
-                                { group: '有序清單', label: "食譜步驟", content: '<h4>食譜步驟</h4><ol><li>打蛋</li><li>加牛奶</li><li>攪拌均勻</li></ol>' },
-                                { group: '有序清單', label: "排行榜", content: '<h4>排行榜</h4><ol><li>挑戰者一號</li><li>挑戰者二號</li></ol>' },
-                                { group: '巢狀清單', label: "語言分類", content: '<h4>程式語言</h4><ul><li>前端語言<ul><li>HTML</li><li>CSS</li></ul></li><li>後端語言<ul><li>Python</li><li>PHP</li></ul></li></ul>' }
-                            ],
-                            challenge: { prompt: "挑戰：建立一個包含三個項目的有序清單，內容分別是：HTML、CSS、JavaScript。", hint: "你需要一個 <ol> 標籤，裡面包著三個 <li> 標籤。", validator: (el) => { const ol = el.querySelector('ol'); const lis = el.querySelectorAll('li'); return ol && lis.length === 3 && lis[0].textContent.trim() === 'HTML' && lis[1].textContent.trim() === 'CSS' && lis[2].textContent.trim() === 'JavaScript'; } }
-                        },
-                        {
-                            title: '連結與圖片',
-                            insight: `<h4>連結 (Anchor)</h4><p><code>&lt;a&gt;</code> 標籤是網路的基石。它的 <code>href</code> (Hypertext Reference) 屬性指向目標網址。你還可以加上 <code>target="_blank"</code> 屬性，讓連結在新分頁中開啟。</p><h4>圖片 (Image)</h4><p><code>&lt;img&gt;</code> 標籤用於嵌入圖片。<code>src</code> (Source) 屬性是圖片的來源路徑。最重要的屬性之一是 <code>alt</code> (Alternative text)，它為圖片提供替代文字，當圖片無法顯示時會出現，同時對於螢幕閱讀器和 SEO 也極為重要。</p>`,
-                            commands: [
-                                { group: '連結', label: "基本連結", content: '<p>點擊<a href="https://www.google.com/" >這裡</a>前往Google。</p>' },
-                                { group: '連結', label: "新分頁開啟", content: '<p>這個<a href="https://www.google.com/"  target="_blank">連結</a>會在新的分頁開啟。</p>' },
-                                { group: '圖片', label: "顯示圖片", content: '<img src="https://raw.githubusercontent.com/weiweiweiweiweiweiweiwei/ET-Topics/refs/heads/main/image/%E4%BA%94%E8%89%B2%E9%B3%A5.png" alt="佔位圖片" style="width:150px;">' },
-                                { group: '圖片', label: "圖片替代文字", content: '<p>若圖片無法顯示，alt屬性很重要：<br><br><img src="non-existent.jpg" alt="一張無法顯示的圖片" style="width:150px;"></p>' },
-                            ],
-                            challenge: { prompt: "挑戰：建立一個可以點擊的圖片連結，圖片來源是 `https://via.placeholder.com/100`，點擊後應在新分頁開啟 `https://www.google.com`。", hint: "將 <img> 包在 <a> 裡面，並為 <a> 加上 href 和 target='_blank' 屬性。", validator: (el) => { const a = el.querySelector('a'); const img = a ? a.querySelector('img') : null; return a && a.href === 'https://www.google.com/' && a.target === '_blank' && img && img.src.includes('placeholder.com/100'); } }
-                        },
-                        {
-                            title: '表格 (Tables)',
-                            insight: `<h4>呈現二維數據</h4><p>HTML 表格專門用於呈現行列分明的二維數據。請避免使用表格來進行頁面排版，那是不正確的用法。</p><h5>核心結構：</h5><ul><li><code>&lt;table&gt;</code>: 表格的根元素。</li><li><code>&lt;tr&gt;</code>: 表格中的一列 (table row)。</li><li><code>&lt;th&gt;</code>: 表頭單元格 (table header)，內容預設為粗體並置中。</li><li><code>&lt;td&gt;</code>: 標準的資料單元格 (table data)。</li><li><code>&lt;caption&gt;</code>: 表格的標題。</li></ul>`,
-                            commands: [
-                                { group: '表格範例', label: "基本表格", content: '<table border="1" style="color:black; border-collapse:collapse; width:100%;"><tr><th>姓名</th><th>職業</th></tr><tr><td>小明</td><td>工程師</td></tr></table>' },
-                                { group: '表格範例', label: "帶有標題的表格", content: '<table border="1" style="color:black; border-collapse:collapse; width:100%;"><caption>員工資料</caption><tr><th>姓名</th><th>職業</th></tr><tr><td>小華</td><td>設計師</td></tr></table>' },
-                                { group: '表格範例', label: "合併儲存格的表格", content: '<table border="1" style="color:black; border-collapse:collapse; width:100%;"><tr><th>項目</th><td>A</td><td>B</td></tr><tr><th rowspan="2">時段</th><td>上午</td><td>下午</td></tr><tr><td>上午</td><td>下午</td></tr></table>' }
-                            ],
-                            challenge: { prompt: "挑戰：建立一個 2x2 的表格，第一列是表頭，內容為「產品」和「價格」。第二列是資料，內容為「蘋果」和「50」。", hint: "你需要 <table>, <tr>, <th>, 和 <td> 標籤。", validator: (el) => { const ths = el.querySelectorAll('th'); const tds = el.querySelectorAll('td'); return ths.length === 2 && tds.length === 2 && ths[0].textContent === '產品' && ths[1].textContent === '價格' && tds[0].textContent === '蘋果' && tds[1].textContent === '50'; } }
-                        },
-                        {
-                            title: '語意化佈局標籤',
-                            insight: `<h4>結構化你的頁面</h4><p>過去，網頁佈局大量依賴 <code>&lt;div&gt;</code>。現代 HTML5 提供了更具語意化的標籤來描述頁面的各個區塊，這對 SEO 和可訪問性有極大好處。</p><h5>常用佈局標籤：</h5><ul><li><code>&lt;header&gt;</code>: 頁面或區塊的頁首。</li><li><code>&lt;nav&gt;</code>: 導覽連結區塊。</li><li><code>&lt;main&gt;</code>: 頁面的主要內容。</li><li><code>&lt;footer&gt;</code>: 頁面或區塊的頁尾。</li></ul><p><b>提示：</b>此單元的範例會直接改變預覽區的結構，而非疊加。</p>`,
-                            commands: [
-                                { label: "Header 範例", action: (el) => { el.style.cssText = 'display:flex; flex-direction:column; justify-content:flex-start; min-height:300px; border:1px dashed #ccc; padding: 10px;'; el.innerHTML = '<header style="border:2px dashed blue; padding:10px; background-color: #e0f2f7; width: 100%;">這裡是用於頁面頂部的標題或導覽區塊</header>'; } },
-                                { label: "Nav 範例", action: (el) => { el.style.cssText = 'display:block; min-height:auto; border:none; padding: 10px;'; el.innerHTML = `<nav style="border:2px solid green; padding:10px; background-color: #e6ffe6; text-align: center;"><a href="#" onclick="return false;" style="margin:0 15px; text-decoration:none; color: green; font-weight: bold;">首頁</a><a href="#" onclick="return false;" style="margin:0 15px; text-decoration:none; color: green; font-weight: bold;">關於我們</a><a href="#" onclick="return false;" style="margin:0 15px; text-decoration:none; color: green; font-weight: bold;">服務項目</a></nav>`; } },
-                                { label: "Footer 範例", action: (el) => { el.style.cssText = 'display:flex; flex-direction:column; justify-content:flex-end; min-height:300px; border:1px dashed #ccc; padding: 10px;'; el.innerHTML = '<footer style="border:2px dashed purple; padding:10px; background-color: #f7e0f7; width: 100%;">這裡是用於頁面底部的版權或聯絡資訊區塊</footer>'; } },
-                                { label: "完整結構範例", action: (el) => { el.style.cssText = 'display:flex; flex-direction:column; justify-content:space-between; min-height:400px; border:1px solid #999; padding: 0;'; el.innerHTML = `<header style="border:1px solid #ccc; padding:8px; background-color: #f0f0f0; text-align: center; color: black;">頁首 (Header)</header><main style="padding:20px; flex-grow: 1; display: flex; align-items: center; justify-content: center; background-color: #ffffff; color: black;">主要內容 (Main Content)<br>(自動填滿中間空間)</main><footer style="border:1px solid #ccc; padding:8px; background-color: #f0f0f0; text-align: center; color: black;">頁尾 (Footer)</footer>`; } }
-                            ],
-                            challenge: { prompt: "挑戰：建立一個包含 &lt;header&gt; 和 &lt;footer&gt; 的基本頁面結構。", hint: "你需要一個 <header> 標籤和一個 <footer> 標籤。", validator: (el) => { const header = el.querySelector('header'); const footer = el.querySelector('footer'); return header && footer; } }
-                        }
-                    ]
-                },
-                'CSS': {
-                    title: '基礎 CSS',
-                    lessons: [
-                        {
-                            title: '選擇器與基本語法',
-                            insight: `<h4>CSS 的核心：選取並美化</h4><p>CSS (Cascading Style Sheets) 的基本語法是 <code>selector { property: value; }</code>。首先，你需要用「選擇器」(Selector) 選取到你想美化的 HTML 元素，然後在括號內宣告一條或多條「屬性: 值」的樣式規則。</p><h5>三種基本選擇器：</h5><ul><li><strong>元素選擇器</strong>: 直接使用標籤名稱，如 <code>p</code>。</li><li><strong>Class 選擇器</strong>: 使用點 <code>.</code> 開頭，如 <code>.my-class</code>。</li><li><strong>ID 選擇器</strong>: 使用井號 <code>#</code> 開頭，如 <code>#unique-id</code>。</li></ul><p>現在，試著點擊下方的按鈕，組合不同的樣式，看看盒子有什麼變化吧！</p>`,
-                            commands: [
-                                { group: '文字顏色 (color)', label: "color: pink;", property: "color", value: "pink" },
-                                { group: '文字顏色 (color)', label: "color: orange;", property: "color", value: "orange" },
-                                { group: '文字顏色 (color)', label: "color: #8ab4f8;", property: "color", value: "#8ab4f8" },
-                                { group: '背景顏色 (background-color)', label: "background: yellow;", property: "backgroundColor", value: "yellow" },
-                                { group: '背景顏色 (background-color)', label: "background: lightblue;", property: "backgroundColor", value: "lightblue" },
-                                { group: '背景顏色 (background-color)', label: "background: #5f6368;", property: "backgroundColor", value: "#5f6368" },
-                                { group: '字體大小 (font-size)', label: "font-size: 12px;", property: "fontSize", value: "12px" },
-                                { group: '字體大小 (font-size)', label: "font-size: 24px;", property: "fontSize", value: "24px" },
-                                { group: '字體大小 (font-size)', label: "font-size: 36px;", property: "fontSize", value: "36px" },
-                            ],
-                            challenge: { prompt: "挑戰：讓盒子的背景顏色設定為紅色 (`red`)。", hint: "請試著使用 `background-color` 屬性。例如：`background-color: red;`", validator: (el) => el.style.backgroundColor === 'red' }
-                        },
-                        {
-                            title: '顏色與背景',
-                            insight: `<h4>賦予色彩</h4><p><code>color</code> 屬性設定文字顏色，而 <code>background-color</code> 設定背景色。除了顏色名稱，更常用十六進位碼 (hex, 如 <code>#FFFFFF</code>) 或 <code>rgb()</code> / <code>rgba()</code>。</p><p><code>background-image</code> 屬性更為強大，可以用 <code>linear-gradient()</code> 來創造平滑的漸層背景。</p>`,
-                            commands: [
-                                { group: '背景顏色', label: "background-color: #4285F4;", property: "backgroundColor", value: "#4285F4" },
-                                { group: '背景顏色', label: "background-color: #34A853;", property: "backgroundColor", value: "#34A853" },
-                                { group: '背景顏色', label: "background-color: #fbbc05;", property: "backgroundColor", value: "#fbbc05" },
-                                { group: '文字顏色', label: "color: #ff6d00;", property: "color", value: "#ff6d00" },
-                                { group: '文字顏色', label: "color: #e8eaed;", property: "color", value: "#e8eaed" },
-                                { group: '文字顏色', label: "color: black;", property: "color", value: "black" },
-                                { group: '漸層背景', label: "gradient(to right, ...)", property: "backgroundImage", value: "linear-gradient(to right, #4285F4, #34A853)" },
-                                { group: '漸層背景', label: "gradient(to bottom, ...)", property: "backgroundImage", value: "linear-gradient(to bottom, #EA4335, #fbbc05)" },
-                                { group: '漸層背景', label: "gradient(45deg, ...)", property: "backgroundImage", value: "linear-gradient(45deg, #34A853, #1e1f20)" },
-                            ],
-                            challenge: { prompt: "挑戰：將盒子的背景設為十六進位碼 `#000000`，文字顏色設為 `#FFFFFF`。", hint: "你需要 `background-color` 和 `color` 兩個屬性。", validator: (el) => el.style.backgroundColor === 'rgb(0, 0, 0)' && el.style.color === 'rgb(255, 255, 255)' }
-                        },
-                        {
-                            title: '字體與排印學',
-                            insight: `<h4>文字的藝術</h4><p>美化文字是 CSS 的核心功能。你可以控制字體、大小、粗細、對齊方式等，這些共同構成了網頁的排印學 (Typography)。</p><ul><li><code>font-family</code>: 設定字體。</li><li><code>font-size</code>: 控制文字大小。</li><li><code>font-weight</code>: 控制文字粗細。</li><li><code>text-align</code>: 設定文字的水平對齊方式。</li></ul><p><b>提示：</b>為了讓 <code>text-align</code> 的效果更明顯，預覽區中的容器寬度已被設為100%。</p>`,
-                            commands: [
-                                { group: '字體 (font-family)', label: "黑體 (Sans-Serif)", property: "fontFamily", value: `"Microsoft JhengHei", "微軟正黑體", "PingFang TC", sans-serif` },
-                                { group: '字體 (font-family)', label: "明體 (Serif)", property: "fontFamily", value: `"LiSong Pro", "Apple LiSung", "新細明體", PMingLiU, serif` },
-                                { group: '字體 (font-family)', label: "楷體 (Script)", property: "fontFamily", value: `BiauKai, "標楷體", DFKai-SB, "Kaiti TC", serif` },
-                                { group: '字體大小 (font-size)', label: "1rem", property: "fontSize", value: "1rem" },
-                                { group: '字體大小 (font-size)', label: "1.5rem", property: "fontSize", value: "1.5rem" },
-                                { group: '字體大小 (font-size)', label: "2rem", property: "fontSize", value: "2rem" },
-                                { group: '字體粗細 (font-weight)', label: "normal", property: "fontWeight", value: "normal" },
-                                { group: '字體粗細 (font-weight)', label: "bold", property: "fontWeight", value: "bold" },
-                                { group: '文字對齊 (text-align)', label: "left", property: "textAlign", value: "left" },
-                                { group: '文字對齊 (text-align)', label: "center", property: "textAlign", value: "center" },
-                                { group: '文字對齊 (text-align)', label: "right", property: "textAlign", value: "right" },
-                            ],
-                            challenge: { prompt: "挑戰：將盒子的文字大小設為 `20px`，設為粗體 (`bold`)，並且置中對齊。", hint: "你需要 `font-size`, `font-weight`, 和 `text-align` 三個屬性。", validator: (el) => el.style.fontSize === '20px' && (el.style.fontWeight === 'bold' || el.style.fontWeight === '700') && el.style.textAlign === 'center' }
-                        },
-                        {
-                            title: '盒子模型 (Box Model)',
-                            insight: `<h4>萬物皆為盒</h4><p>CSS 的佈局基礎就是盒子模型。每個元素都被視為一個矩形盒子，它由內而外分別是：</p><ol><li><strong>Content</strong>: 內容區。</li><li><strong>Padding</strong>: 內邊距，內容與邊框之間的空間。</li><li><strong>Border</strong>: 邊框。</li><li><strong>Margin</strong>: 外邊距，邊框與其他元素之間的空間。</li></ol><p><b>提示：</b>為了讓 <code>margin</code> 和 <code>padding</code> 效果更明顯，預覽區已為您加入參考物件。</p>`,
-                            commands: [
-                                { group: '內邊距 (padding)', label: "padding: 10px", property: "padding", value: "10px" },
-                                { group: '內邊距 (padding)', label: "padding: 25px", property: "padding", value: "25px" },
-                                { group: '內邊距 (padding)', label: "padding: 40px", property: "padding", value: "40px" },
-                                { group: '外邊距 (margin)', label: "margin: 10px", property: "margin", value: "10px" },
-                                { group: '外邊距 (margin)', label: "margin: 20px", property: "margin", value: "20px" },
-                                { group: '外邊距 (margin)', label: "margin: 40px", property: "margin", value: "40px" },
-                                { group: '邊框 (border)', label: "3px solid #EA4335", property: "border", value: "3px solid #EA4335" },
-                                { group: '邊框 (border)', label: "5px dashed #4285F4", property: "border", value: "5px dashed #4285F4" },
-                                { group: '圓角 (border-radius)', label: "15px", property: "borderRadius", value: "15px" },
-                                { group: '圓角 (border-radius)', label: "50%", property: "borderRadius", value: "50%" },
-                            ],
-                            challenge: { prompt: "挑戰：給盒子 `10px` 的外邊距 (`margin`)、`3px` 的實線藍色邊框 (`border`)，以及 `20px` 的內邊距 (`padding`)。", hint: "你需要 `margin`, `border`, 和 `padding` 三個屬性。", validator: (el) => el.style.margin === '10px' && el.style.border === '3px solid blue' && el.style.padding === '20px' }
-                        },
-                        {
-                            title: 'Flexbox 佈局',
-                            insight: `<h4>現代一維佈局</h4><p>Flexbox 是一種強大的一維佈局模型，極大地簡化了對齊和空間分配。在父容器上設定 <code>display: flex;</code> 即可啟用。</p><h5>核心屬性：</h5><ul><li><code>justify-content</code>: 控制項目在主軸上的對齊。</li><li><code>align-items</code>: 控制項目在交錯軸上的對齊。</li><li><code>flex-direction</code>: 改變主軸的方向。</li></ul><p><b>提示：</b>為了展示佈局效果，預覽區中已為您建立多個方塊。</p>`,
-                            commands: [
-                                { group: '啟用 Flexbox', label: "display: flex", property: "display", value: "flex" },
-                                { group: '啟用 Flexbox', label: "display: block", property: "display", value: "block" },
-                                { group: '主軸方向', label: "flex-direction: row", property: "flexDirection", value: "row" },
-                                { group: '主軸方向', label: "flex-direction: column", property: "flexDirection", value: "column" },
-                                { group: '主軸對齊', label: "justify-content: flex-start", property: "justifyContent", value: "flex-start" },
-                                { group: '主軸對齊', label: "justify-content: center", property: "justifyContent", value: "center" },
-                                { group: '主軸對齊', label: "justify-content: space-around", property: "justifyContent", value: "space-around" },
-                                { group: '交錯軸對齊', label: "align-items: stretch", property: "alignItems", value: "stretch" },
-                                { group: '交錯軸對齊', label: "align-items: center", property: "alignItems", value: "center" },
-                                { group: '換行', label: "flex-wrap: nowrap", property: "flexWrap", value: "nowrap" },
-                                { group: '換行', label: "flex-wrap: wrap", property: "flexWrap", value: "wrap" },
-                            ],
-                            challenge: { prompt: "挑戰：讓容器內的物件水平和垂直都置中。", hint: "在容器上使用 `display: flex`, `justify-content: center`, 和 `align-items: center`。", validator: (el) => el.style.display === 'flex' && el.style.justifyContent === 'center' && el.style.alignItems === 'center' }
-                        }
-                    ]
-                }
-            };
-
-            // ---- Main App Functions ----
-            function showMainMenu() {
-                mainMenu.classList.remove("hidden-view");
-                learnView.classList.add("hidden-view");
-                quizPageContainer.classList.add("hidden-view");
-                if (splitInstance) destroyDesktopLayout();
-            }
-
-            window.selectUnit = function (e) { currentUnit = e; cssPlayground.classList.toggle("hidden", e === 'HTML'); htmlSandbox.classList.toggle("hidden", e === 'CSS'); const t = localStorage.getItem(`progress_${e}`); completedLessons = t ? new Set(JSON.parse(t).map(Number)) : new Set(); const l = curriculum[e].lessons.length; currentLessonIndex = completedLessons.size === l ? 0 : completedLessons.size; unitTitleHeader.textContent = curriculum[e].title; navbarTitle.textContent = curriculum[e].title; mainMenu.classList.add("hidden-view"); learnView.classList.remove("hidden-view"); quizPageContainer.classList.add("hidden-view"); handleResize(); selectLesson(currentLessonIndex); }
-            function destroyDesktopLayout() { if (splitInstance) { splitInstance.destroy(); splitInstance = null; } Object.values(panels).forEach(e => e.style.width = ""); }
-            function handleResize() { if (window.innerWidth < 769) destroyDesktopLayout(); else setupDesktopLayout(); }
-            function setupDesktopLayout() { if (window.innerWidth < 769 || splitInstance) return; splitInstance = Split(['#codex-panel', '#insight-panel', '#playground-panel'], { sizes: [25, 50, 25], minSize: [60, 200, 200], gutterSize: GutterSize, snapOffset: 30 }); }
-            function setupDefaultPlayground() { visualBox.style.cssText = ""; visualBox.innerHTML = ''; visualBox.appendChild(document.createTextNode("Box")); visualBox.style.width = '150px'; visualBox.style.height = '150px'; visualBox.style.display = 'flex'; visualBox.style.justifyContent = 'center'; visualBox.style.alignItems = 'center'; cssPlayground.innerHTML = ''; cssPlayground.style.cssText = ''; cssPlayground.appendChild(visualBox); }
-            function resetPlaygrounds() { setupDefaultPlayground(); htmlSandbox.innerHTML = ""; activeHtmlContent = {}; }
-            function setupTypographyPlayground() { visualBox.style.width = '100%'; visualBox.innerHTML = '網站字體設計'; visualBox.style.display = 'block'; visualBox.style.justifyContent = null; visualBox.style.alignItems = null; }
-            function setupBoxModelPlayground() { cssPlayground.innerHTML = ''; cssPlayground.style.flexDirection = 'row'; cssPlayground.style.alignItems = 'center'; cssPlayground.style.justifyContent = 'center'; visualBox.style.display = 'block'; visualBox.style.justifyContent = null; visualBox.style.alignItems = null; visualBox.innerHTML = ''; const e = document.createElement('div'); e.className = 'content-box-inner'; e.textContent = 'Content'; e.style.width = '80px'; e.style.height = '80px'; visualBox.appendChild(e); const t = document.createElement('div'); t.className = 'box-model-sibling'; t.textContent = '參考物件'; cssPlayground.appendChild(visualBox); cssPlayground.appendChild(t); }
-            function setupFlexboxPlayground() { cssPlayground.innerHTML = ''; cssPlayground.style.height = '100%'; for (let e = 0; e < 6; e++) { const t = document.createElement('div'); t.className = 'flex-item'; cssPlayground.appendChild(t); } }
-            function selectLesson(e) { if (!currentUnit) return; const t = curriculum[currentUnit]; const l = t.lessons.length; if (e > completedLessons.size && e < l) return; currentLessonIndex = e; renderLesson(); }
-            function renderLessonList() { const e = curriculum[currentUnit], t = e.lessons.length, l = completedLessons.size; const n = t > 0 ? Math.round(l / t * 100) : 0; progressBarFg.style.width = `${n}%`; progressPercentage.textContent = `${n}%`; lessonList.innerHTML = ""; e.lessons.forEach((e, t) => { const l = document.createElement("li"); l.className = "lesson-item"; l.innerHTML = `<div class="lesson-icon-container"><span>${t + 1}</span></div><span class="lesson-text">${e.title}</span>`; const n = completedLessons.has(t); const s = !n && t > completedLessons.size; n && l.classList.add("completed"); s && l.classList.add("locked"); t === currentLessonIndex && l.classList.add("active"); l.onclick = () => selectLesson(t); lessonList.appendChild(l); }); }
-            function renderLesson() { resetPlaygrounds(); renderLessonList(); const e = curriculum[currentUnit].lessons[currentLessonIndex]; lessonTitle.textContent = e.title; lessonInsight.innerHTML = e.insight; commandButtons.innerHTML = ""; const t = e.commands[0]?.action; if (t) { e.commands.forEach(e => { const t = document.createElement("button"); t.className = "command-btn"; t.textContent = e.label; t.setAttribute('aria-label', `範例: ${e.label}`); t.onclick = t => { const l = t.currentTarget.classList.contains('active-command'); document.querySelectorAll('#command-buttons .command-btn').forEach(e => e.classList.remove('active-command')); htmlSandbox.innerHTML = ''; htmlSandbox.style.cssText = ''; l || (t.currentTarget.classList.add('active-command'), e.action(htmlSandbox)); }; commandButtons.appendChild(t); }); } else { let l = currentUnit === 'HTML' ? htmlSandbox : visualBox; if (currentUnit === 'CSS') { const n = e.title; n === '字體與排印學' ? setupTypographyPlayground() : n === '盒子模型 (Box Model)' ? setupBoxModelPlayground() : n === 'Flexbox 佈局' && (setupFlexboxPlayground(), l = cssPlayground); } const n = e.commands.reduce((e, t) => { const l = t.group || 'General'; (e[l] = e[l] || []).push(t); return e; }, {}); Object.entries(n).forEach(([e, t]) => { const n = document.createElement('div'); n.style.cssText = "margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 15px 15px 15px;"; const s = document.createElement('p'); s.textContent = e; s.style.cssText = "font-size: 0.9em; color: var(--text-secondary-color); margin-bottom: 0px;"; n.appendChild(s); t.forEach(e => { const t = document.createElement("button"); t.className = "command-btn"; t.textContent = e.label; t.setAttribute('aria-label', `套用: ${e.label}`); t.dataset.group = e.group; if (currentUnit === 'CSS') { t.dataset.property = e.property; t.dataset.value = e.value; t.onclick = e => handleCssCommandClick(e, l); } else { t.dataset.content = e.content; t.onclick = handleHtmlCommandClick; } n.appendChild(t); }); commandButtons.appendChild(n); }); } renderChallengeArea(); switchTab('insight'); }
-            function handleCssCommandClick(e, t) { const l = e.currentTarget; const n = l.dataset.property; const s = l.dataset.value; const i = l.classList.contains('active-command'); const a = l.parentElement.querySelectorAll('.command-btn'); if (i) { l.classList.remove('active-command'); t.style[n] = null; } else { a.forEach(e => e.classList.remove('active-command')); l.classList.add('active-command'); t.style[n] = s; } }
-            function handleHtmlCommandClick(e) { const t = e.currentTarget; const l = t.dataset.content; const n = t.dataset.group; const s = t.classList.contains('active-command'); const i = t.parentElement.querySelectorAll('.command-btn'); if (s) { t.classList.remove('active-command'); delete activeHtmlContent[n]; } else { i.forEach(e => e.classList.remove('active-command')); t.classList.add('active-command'); activeHtmlContent[n] = l; } updateHtmlSandbox(); }
-            function updateHtmlSandbox() { const e = Object.keys(curriculum.HTML.lessons.reduce((e, t) => { t.commands[0]?.group && t.commands.forEach(t => e[t.group] = !0); return e; }, {})); htmlSandbox.innerHTML = Object.keys(activeHtmlContent).sort((t, l) => e.indexOf(t) - e.indexOf(l)).map(e => activeHtmlContent[e]).join('\n'); }
-            function renderChallengeArea() {
-                lessonChallengeArea.innerHTML = ""; const e = curriculum[currentUnit].lessons[currentLessonIndex]; if (completedLessons.has(currentLessonIndex)) { let t = (currentLessonIndex >= curriculum[currentUnit].lessons.length - 1) ? `<button id="finish-btn" class="btn">完成所有課程！</button>` : `<button id="next-lesson-btn" class="btn shimmer">前往下一課 →</button>`; lessonChallengeArea.innerHTML = `<p style="color: var(--success-color); font-weight: bold; text-align: center;">✓ 挑戰完成!</p>${t}`; if (currentLessonIndex < curriculum[currentUnit].lessons.length - 1) { document.getElementById("next-lesson-btn").onclick = () => selectLesson(currentLessonIndex + 1); } else { document.getElementById("finish-btn").onclick = showMainMenu; } return; }
-                lessonChallengeArea.innerHTML = `<h4>${e.challenge.prompt}</h4><div id="challenge-input-container"><textarea id="challenge-input" placeholder="在這裡輸入程式碼..." autocomplete="off" spellcheck="false"></textarea><div id="challenge-feedback"></div></div>`; const t = document.getElementById("challenge-input"); t.oninput = () => checkChallengeLive();
-            }
-            function checkChallengeLive() {
-                const e = document.getElementById("challenge-input"), t = document.getElementById("challenge-feedback"), l = curriculum[currentUnit].lessons[currentLessonIndex]; if (!e || !t) return; let n = !1; try { if (currentUnit === 'HTML') { htmlSandbox.innerHTML = e.value; n = l.challenge.validator(htmlSandbox); } else { const s = document.createElement('div'); const i = document.createElement('div'); if (l.title === 'Flexbox 佈局') { s.style.cssText = e.value; n = l.challenge.validator(s); } else { i.style.cssText = e.value; n = l.challenge.validator(i); } } } catch (s) { n = !1; }
-                if (n) { e.classList.remove("error"); e.classList.add("success"); e.disabled = !0; t.textContent = "太棒了，完全正確！"; t.style.color = "var(--success-color)"; completedLessons.add(currentLessonIndex); localStorage.setItem(`progress_${currentUnit}`, JSON.stringify(Array.from(completedLessons))); if (currentUnit === 'CSS') { let n = l.title === 'Flexbox 佈局' ? cssPlayground : visualBox; n.style.cssText += e.value; } setTimeout(() => { renderLessonList(); renderChallengeArea(); }, 1e3); } else { e.classList.remove("success"); if (e.value.trim().length > 2) { e.classList.add("error"); t.textContent = l.challenge.hint; t.style.color = "var(--error-color)"; } else { e.classList.remove("error"); t.textContent = ""; } }
-            }
-            function switchTab(e) { if (e === 'insight') { tabInsight.classList.add('active'); tabChallenge.classList.remove('active'); insightContentTab.classList.remove('hidden'); challengeContentTab.classList.add('hidden'); } else { tabInsight.classList.remove('active'); tabChallenge.classList.add('active'); insightContentTab.classList.add('hidden'); challengeContentTab.classList.remove('hidden'); const t = document.getElementById("challenge-input"); t && t.focus(); } }
-            function togglePanelCollapse(e, t) {
-                const l = panels[e]; if (!splitInstance) return; const n = l.classList.contains("is-collapsed"); const s = Object.keys(panels).indexOf(e); if (n) { l.classList.remove("is-collapsed"); const i = JSON.parse(l.dataset.originalSizes); splitInstance.setSizes(i); t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>`; } else {
-                    l.dataset.originalSizes = JSON.stringify(splitInstance.getSizes()); l.classList.add("is-collapsed"); const i = splitInstance.getSizes(); const a = 60; const o = document.getElementById('panels-container'); const r = GutterSize * (NumPanels - 1); const c = o.clientWidth - r; const d = a / c * 100; const g = i[s] - d; i[s] = d; if (s === 0) { i[1] += g; } else if (s === 2) { i[1] += g; } else { i[0] += g / 2; i[2] += g / 2; }
-                    splitInstance.setSizes(i); t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>`;
-                }
-            }
-
-            // ---- Quiz App Logic (Self-contained) ----
-            const quizApp = () => {
-                const quizData = [
-                    { topic: 'HTML', type: 'mc', prompt: '在 HTML 中，哪個標籤的重要性最高，通常一個頁面只會有一個？', options: ['&lt;h6&gt;', '&lt;h1&gt;', '&lt;p&gt;', '&lt;header&gt;'], answer: 1 },
-                    { topic: 'CSS', type: 'mc', prompt: '在 CSS 中，用來選取 `id="logo"` 元素的正確選擇器是什麼？', options: ['.logo', '#logo', 'logo', '&lt;logo&gt;'], answer: 1 },
-                    { topic: 'HTML', type: 'mc', prompt: '當你想讓一個連結 `&lt;a&gt;` 在新分頁中開啟，應該使用哪個屬性？', options: ['target="_blank"', 'link="_new"', 'tab="new"', 'target="_new"'], answer: 0 },
-                    { topic: 'CSS', type: 'mc', prompt: '`margin` 和 `padding` 的主要區別是什麼？', options: ['Margin 是內邊距，Padding 是外邊距', 'Margin 是元素邊框外的空間，Padding 是邊框內的空間', '兩者沒有區別', 'Padding 控制背景色，Margin 控制文字間距'], answer: 1 },
-                    { topic: 'HTML', type: 'text', prompt: '請撰寫一個無序清單 (unordered list)，其中包含兩個清單項目 (list items)，內容分別為「蘋果」和「香蕉」。', answer: `<ul><li>蘋果</li><li>香蕉</li></ul>` },
-                    { topic: 'CSS', type: 'text', prompt: '請撰寫一條 CSS 規則，將所有 `&lt;p&gt;` 標籤的文字顏色設定為紅色 (red)。', answer: `p{color:red;}` },
-                    { topic: 'HTML', type: 'text', prompt: '請撰寫一個完整的圖片標籤，圖片來源是 `logo.png`，替代文字是 `公司標誌`。', answer: `<img src="logo.png" alt="公司標誌">` },
-                    { topic: 'CSS', type: 'text', prompt: '請撰寫一條 CSS 規則，為 class 是 `.box` 的元素加上 `2px` 的藍色實線邊框。', answer: `.box{border:2px solid blue;}` },
-                    { topic: 'HTML', type: 'mc', prompt: '哪個語意化標籤最適合用來放置網站的主要導覽列？', options: ['&lt;header&gt;', '&lt;div class=&quot;nav&quot;&gt;', '&lt;nav&gt;', '&lt;menu&gt;'], answer: 2 },
-                    { topic: 'CSS', type: 'mc', prompt: '如何讓一個 Flex 容器 (flex container) 的子項目在主軸上置中對齊？', options: ['align-items: center;', 'text-align: center;', 'justify-content: center;', 'margin: auto;'], answer: 2 },
-                ];
-                let appState = 'quiz'; let currentQuestionIndex = 0; let userAnswers = Array(quizData.length).fill(null); let score = 0;
-                const get = (id) => document.getElementById(id);
-                const quizHeader = document.querySelector('#quiz-page-container .quiz-header'); const quizView = get('quiz-view'), resultsView = get('results-view'); const prevBtn = get('prev-btn'), nextBtn = get('next-btn'); const retryBtn = get('retry-btn'), reviewBtn = get('review-btn');
-                function normalizeAnswer(str) { if (typeof str !== 'string') return ''; return str.replace(/\s|;|(\r\n|\n|\r)/gm, "").toLowerCase(); }
-                function adjustOptionLayout() { const optionsContainer = document.querySelector('#quiz-page-container .mc-options-container'); if (!optionsContainer) return; const quizNav = document.querySelector('#quiz-page-container .quiz-navigation'); optionsContainer.classList.remove('grid-2x2'); setTimeout(() => { const optionsRect = optionsContainer.getBoundingClientRect(); const navRect = quizNav.getBoundingClientRect(); if (optionsRect.bottom > navRect.top) { optionsContainer.classList.add('grid-2x2'); } }, 0); }
-                function renderQuestion() {
-                    get('question-area-wrapper').scrollTop = 0; quizView.classList.toggle('is-review', appState === 'review'); get('quiz-progress').textContent = `題目 ${currentQuestionIndex + 1} / ${quizData.length}`; const question = quizData[currentQuestionIndex]; get('question-prompt').innerHTML = question.prompt; const questionBody = get('question-body'); questionBody.innerHTML = ''; const isReview = appState === 'review'; if (question.type === 'mc') {
-                        const container = document.createElement('div'); container.className = 'mc-options-container'; question.options.forEach((opt, index) => {
-                            const label = document.createElement('label'); label.htmlFor = `q${index}`; label.innerHTML = opt; const input = document.createElement('input'); input.type = 'radio'; input.id = `q${index}`; input.name = `q${currentQuestionIndex}`; input.value = index; input.checked = userAnswers[currentQuestionIndex] === index; input.disabled = isReview; input.addEventListener('change', (e) => userAnswers[currentQuestionIndex] = parseInt(e.target.value)); if (isReview) { const isUserAnswer = (userAnswers[currentQuestionIndex] === index); const isCorrectAnswer = (question.answer === index); if (isUserAnswer) label.classList.add(isCorrectAnswer ? 'user-correct' : 'user-incorrect'); else if (isCorrectAnswer) label.classList.add('true-correct'); }
-                            const div = document.createElement('div'); div.className = 'mc-option'; div.appendChild(input); div.appendChild(label); container.appendChild(div);
-                        }); questionBody.appendChild(container); adjustOptionLayout();
-                    } else {
-                        const container = document.createElement('div'); container.className = 'text-input-container'; const textarea = document.createElement('textarea'); textarea.value = userAnswers[currentQuestionIndex] || ""; textarea.placeholder = "請在此輸入程式碼..."; textarea.disabled = isReview; textarea.addEventListener('input', (e) => userAnswers[currentQuestionIndex] = e.target.value); if (isReview) { const isCorrect = normalizeAnswer(textarea.value) === normalizeAnswer(question.answer); textarea.classList.add(isCorrect ? 'correct-text' : 'incorrect-text'); }
-                        container.appendChild(textarea); questionBody.appendChild(container);
-                    } renderFeedback(); updateNavButtons();
-                }
-                function renderFeedback() {
-                    const feedbackArea = get('question-feedback-area'); feedbackArea.innerHTML = ''; feedbackArea.className = 'hidden'; if (appState !== 'review') return; const question = quizData[currentQuestionIndex]; const isCorrect = (question.type === 'mc') ? (userAnswers[currentQuestionIndex] === question.answer) : (normalizeAnswer(userAnswers[currentQuestionIndex]) === normalizeAnswer(question.answer)); feedbackArea.classList.remove('hidden'); feedbackArea.classList.add(isCorrect ? 'correct' : 'incorrect'); if (isCorrect) { feedbackArea.innerHTML = '<p>✓ 回答正確</p>'; } else { const correctAnswerText = question.type === 'mc' ? question.options[question.answer] : question.answer.replace(/</g, "<"); feedbackArea.innerHTML = `<p>✗ 回答錯誤</p><div id="correct-answer-display"><strong>正確答案：</strong><code>${correctAnswerText}</code></div>`; }
-                    adjustOptionLayout();
-                }
-                function updateNavButtons() { prevBtn.disabled = currentQuestionIndex === 0; if (appState === 'quiz') nextBtn.textContent = currentQuestionIndex === quizData.length - 1 ? '完成測驗' : '下一題'; else if (appState === 'review') nextBtn.textContent = currentQuestionIndex === quizData.length - 1 ? '返回總結' : '下一題'; }
-                function calculateAndShowResults() {
-                    score = quizData.reduce((acc, q, i) => acc + (q.type === 'mc' ? (userAnswers[i] === q.answer) : (normalizeAnswer(userAnswers[i]) === normalizeAnswer(q.answer)) ? 1 : 0), 0); appState = 'results'; quizHeader.classList.add('hidden'); quizView.classList.add('hidden'); resultsView.classList.remove('hidden'); const finalScore = Math.round((score / quizData.length) * 100); get('final-score-text').textContent = finalScore; setTimeout(() => get('final-score-circle').style.background = `conic-gradient(from 0deg, var(--success-color) ${finalScore}%, var(--bg-color) 0%)`, 100); const title = get('results-summary-title'), text = get('results-summary-text'); if (finalScore === 100) { title.textContent = "完美！恭喜你全部答對！"; text.textContent = "你對 HTML 與 CSS 的基礎觀念非常紮實。"; }
-                    else if (finalScore >= 70) { title.textContent = "表現得很好！"; text.textContent = `你答對了 ${score} 題，離精通只有一步之遙。`; } else { title.textContent = "再接再厲！"; text.textContent = `別氣餒，複習一下錯誤的題目，你會變得更強。`; }
-                }
-                nextBtn.addEventListener('click', () => { if (currentQuestionIndex < quizData.length - 1) { currentQuestionIndex++; renderQuestion(); } else { if (appState === 'quiz') calculateAndShowResults(); else if (appState === 'review') { quizHeader.classList.add('hidden'); resultsView.classList.remove('hidden'); quizView.classList.add('hidden'); } } });
-                prevBtn.addEventListener('click', () => currentQuestionIndex > 0 && renderQuestion(--currentQuestionIndex));
-                reviewBtn.addEventListener('click', () => { appState = 'review'; currentQuestionIndex = 0; quizHeader.classList.remove('hidden'); resultsView.classList.add('hidden'); quizView.classList.remove('hidden'); renderQuestion(); });
-                retryBtn.addEventListener('click', () => { appState = 'quiz'; currentQuestionIndex = 0; userAnswers.fill(null); score = 0; quizHeader.classList.remove('hidden'); resultsView.classList.add('hidden'); quizView.classList.remove('hidden'); renderQuestion(); });
-                window.addEventListener('resize', adjustOptionLayout);
-                get('quiz-home-btn').addEventListener('click', showMainMenu);
-                return { start: () => retryBtn.click() };
-            };
-            const finalQuiz = quizApp();
-            window.selectQuiz = () => {
-                mainMenu.classList.add("hidden-view");
-                learnView.classList.add("hidden-view");
-                quizPageContainer.classList.remove("hidden-view");
-                finalQuiz.start();
-            };
-
-            // --- Initial Event Listeners ---
-            // FIX: Restore reset progress button functionality
-            document.querySelectorAll('.reset-progress-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const unitKey = e.currentTarget.dataset.unitKey;
-                    if (confirm(`您確定要重設「${curriculum[unitKey].title}」的所有學習進度嗎？此操作無法復原。`)) {
-                        localStorage.removeItem(`progress_${unitKey}`);
-                        alert(`「${curriculum[unitKey].title}」的進度已成功重設。`);
-                    }
-                });
-            });
-
-            window.addEventListener("resize", handleResize);
-            homeLink.addEventListener("click", (e) => { e.preventDefault(); showMainMenu(); });
-            tabInsight.addEventListener('click', () => switchTab('insight'));
-            tabChallenge.addEventListener('click', () => switchTab('challenge'));
-            goToChallengeBtn.addEventListener('click', () => switchTab('challenge'));
-            document.getElementById("collapse-codex").addEventListener("click", (e) => togglePanelCollapse('codex', e.currentTarget));
-            handleResize();
-        });
-    </script>
 </body>
-
 </html>
